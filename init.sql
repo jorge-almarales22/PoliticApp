@@ -1,0 +1,51 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+CREATE TYPE user_role AS ENUM ('admin', 'manager', 'analyst', 'viewer');
+
+CREATE TABLE IF NOT EXISTS campaigns (
+    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name       VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email         VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255)        NOT NULL,
+    full_name     VARCHAR(255)        NOT NULL,
+    role          user_role           NOT NULL DEFAULT 'viewer',
+    campaign_id   UUID REFERENCES campaigns(id) ON DELETE SET NULL,
+    created_at    TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ         NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS voters (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name   VARCHAR(255)        NOT NULL,
+    dni         VARCHAR(50),
+    address     TEXT,
+    phone       VARCHAR(50),
+    email       VARCHAR(255),
+    location    GEOMETRY(Point, 4326),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ         NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_voters_location
+    ON voters USING GIST (location);
+
+CREATE TABLE IF NOT EXISTS scrutiny_reports (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    title       VARCHAR(255) NOT NULL,
+    report_data JSONB,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign
+    ON scrutiny_reports (campaign_id, created_at DESC);
