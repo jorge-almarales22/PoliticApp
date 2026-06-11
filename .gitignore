@@ -1,0 +1,8 @@
+# PostgreSQL data volume — never commit
+postgres_data/
+
+# Go build artifacts
+*.exe
+
+# Environment secrets (template only)
+.env
