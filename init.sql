@@ -39,12 +39,17 @@ CREATE INDEX IF NOT EXISTS idx_voters_location
     ON voters USING GIST (location);
 
 CREATE TABLE IF NOT EXISTS scrutiny_reports (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-    title       VARCHAR(255) NOT NULL,
-    report_data JSONB,
-    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id     UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    witness_id      UUID         NOT NULL,
+    voting_place    VARCHAR(255) NOT NULL,
+    table_number    INTEGER      NOT NULL,
+    votes_candidate INTEGER      NOT NULL,
+    votes_rival_1   INTEGER      NOT NULL DEFAULT 0,
+    votes_rival_2   INTEGER      NOT NULL DEFAULT 0,
+    e14_image_url   TEXT,
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign

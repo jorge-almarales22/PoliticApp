@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
+	"politic-backend/internal/scrutiny"
 	"politic-backend/internal/user"
 	"politic-backend/internal/voter"
 	"politic-backend/pkg/middleware"
@@ -60,6 +61,10 @@ func main() {
 	voterSvc := voter.NewService(voterRepo)
 	voterHandler := voter.NewHandler(voterSvc)
 
+	scrutinyRepo := scrutiny.NewRepository(dbPool)
+	scrutinySvc := scrutiny.NewService(scrutinyRepo)
+	scrutinyHandler := scrutiny.NewHandler(scrutinySvc)
+
 	// 4. Inicializar el Router de Gin y montar rutas
 	router := gin.Default()
 
@@ -79,6 +84,9 @@ func main() {
 		auth.POST("/login", userHandler.Login)
 	}
 
+	// Servir archivos estáticos (imágenes E-14 subidas por testigos)
+	router.Static("/uploads", "./uploads")
+
 	// Rutas protegidas (requieren token JWT válido)
 	protected := router.Group("/api/v1")
 	protected.Use(middleware.AuthMiddleware(jwtSecret))
@@ -94,6 +102,9 @@ func main() {
 
 		protected.POST("/voters", voterHandler.CreateVoter)
 		protected.GET("/voters", voterHandler.GetVoters)
+
+		protected.POST("/scrutiny", scrutinyHandler.SubmitReport)
+		protected.GET("/scrutiny", scrutinyHandler.GetReports)
 	}
 
 	// 5. Encender el Servidor HTTP
