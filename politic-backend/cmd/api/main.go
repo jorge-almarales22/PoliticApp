@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
+	"politic-backend/internal/logistics"
 	"politic-backend/internal/scrutiny"
 	"politic-backend/internal/user"
 	"politic-backend/internal/voter"
@@ -65,6 +66,10 @@ func main() {
 	scrutinySvc := scrutiny.NewService(scrutinyRepo)
 	scrutinyHandler := scrutiny.NewHandler(scrutinySvc)
 
+	logisticsRepo := logistics.NewRepository(dbPool)
+	logisticsSvc := logistics.NewService(logisticsRepo)
+	logisticsHandler := logistics.NewHandler(logisticsSvc)
+
 	// 4. Inicializar el Router de Gin y montar rutas
 	router := gin.Default()
 
@@ -105,6 +110,11 @@ func main() {
 
 		protected.POST("/scrutiny", scrutinyHandler.SubmitReport)
 		protected.GET("/scrutiny", scrutinyHandler.GetReports)
+
+		protected.POST("/logistics/vehicles", logisticsHandler.CreateVehicle)
+		protected.GET("/logistics/vehicles", logisticsHandler.GetVehicles)
+		protected.POST("/logistics/inventory", logisticsHandler.CreateInventory)
+		protected.POST("/logistics/dispatch", logisticsHandler.SubmitDispatch)
 	}
 
 	// 5. Encender el Servidor HTTP

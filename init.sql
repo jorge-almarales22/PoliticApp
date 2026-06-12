@@ -54,3 +54,35 @@ CREATE TABLE IF NOT EXISTS scrutiny_reports (
 
 CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign
     ON scrutiny_reports (campaign_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS vehicles (
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id  UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    plate        VARCHAR(20)  NOT NULL,
+    model        VARCHAR(100),
+    driver_name  VARCHAR(255) NOT NULL,
+    driver_phone VARCHAR(50),
+    status       VARCHAR(50)  NOT NULL DEFAULT 'DISPONIBLE',
+    created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS logistics_inventory (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id   UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    item_name     VARCHAR(255) NOT NULL,
+    item_type     VARCHAR(50)  NOT NULL,
+    total_qty     INTEGER      NOT NULL,
+    allocated_qty INTEGER      NOT NULL DEFAULT 0,
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS logistics_dispatches (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id   UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    inventory_id  UUID         NOT NULL REFERENCES logistics_inventory(id) ON DELETE CASCADE,
+    receiver_id   UUID         NOT NULL,
+    quantity      INTEGER      NOT NULL,
+    qr_code_token VARCHAR(255) NOT NULL UNIQUE,
+    status        VARCHAR(50)  NOT NULL DEFAULT 'PENDIENTE',
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
