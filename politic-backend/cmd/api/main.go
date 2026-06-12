@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
+	"politic-backend/internal/geo"
 	"politic-backend/internal/logistics"
 	"politic-backend/internal/scrutiny"
 	"politic-backend/internal/user"
@@ -66,6 +67,10 @@ func main() {
 	scrutinySvc := scrutiny.NewService(scrutinyRepo)
 	scrutinyHandler := scrutiny.NewHandler(scrutinySvc)
 
+	geoRepo := geo.NewRepository(dbPool)
+	geoSvc := geo.NewService(geoRepo)
+	geoHandler := geo.NewHandler(geoSvc)
+
 	logisticsRepo := logistics.NewRepository(dbPool)
 	logisticsSvc := logistics.NewService(logisticsRepo)
 	logisticsHandler := logistics.NewHandler(logisticsSvc)
@@ -115,6 +120,8 @@ func main() {
 		protected.GET("/logistics/vehicles", logisticsHandler.GetVehicles)
 		protected.POST("/logistics/inventory", logisticsHandler.CreateInventory)
 		protected.POST("/logistics/dispatch", logisticsHandler.SubmitDispatch)
+
+		protected.GET("/geo/sectors", geoHandler.GetSectorsReport)
 	}
 
 	// 5. Encender el Servidor HTTP

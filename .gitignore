@@ -6,3 +6,6 @@ postgres_data/
 
 # Environment secrets (template only)
 .env
+
+# Archivos GeoJSON de semillas (muy pesados para el repo)
+politic-backend/scripts/data/

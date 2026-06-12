@@ -76,6 +76,19 @@ CREATE TABLE IF NOT EXISTS logistics_inventory (
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS campaign_sectors (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    name        VARCHAR(255) NOT NULL,
+    sector_type VARCHAR(50)  NOT NULL,
+    boundary    GEOMETRY(Geometry, 4326) NOT NULL,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_campaign_sectors_boundary
+    ON campaign_sectors USING GIST (boundary);
+
 CREATE TABLE IF NOT EXISTS logistics_dispatches (
     id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     campaign_id   UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
