@@ -24,6 +24,7 @@ func (s *service) CreateVoter(ctx context.Context, input CreateVoterInput, campa
 		Email:     input.Email,
 		Latitude:  input.Latitude,
 		Longitude: input.Longitude,
+		Tags:      input.Tags,
 	}
 
 	if err := s.repo.Create(ctx, campaignID, mapped); err != nil {
@@ -40,6 +41,7 @@ func (s *service) CreateVoter(ctx context.Context, input CreateVoterInput, campa
 		Latitude:   mapped.Latitude,
 		Longitude:  mapped.Longitude,
 		CampaignID: campaignID,
+		Tags:       mapped.Tags,
 		CreatedAt:  mapped.CreatedAt,
 		UpdatedAt:  mapped.UpdatedAt,
 	}

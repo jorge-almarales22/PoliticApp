@@ -12,18 +12,20 @@ type Voter struct {
 	Latitude   float64   `json:"latitude"`
 	Longitude  float64   `json:"longitude"`
 	CampaignID string    `json:"campaign_id"`
+	Tags       []string  `json:"tags"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type CreateVoterInput struct {
-	FullName  string  `json:"full_name" binding:"required"`
-	Dni       string  `json:"dni" binding:"required"`
-	Address   string  `json:"address"`
-	Phone     string  `json:"phone"`
-	Email     string  `json:"email" binding:"omitempty,email"`
-	Latitude  float64 `json:"latitude" binding:"required"`
-	Longitude float64 `json:"longitude" binding:"required"`
+	FullName  string   `json:"full_name" binding:"required"`
+	Dni       string   `json:"dni" binding:"required"`
+	Address   string   `json:"address"`
+	Phone     string   `json:"phone"`
+	Email     string   `json:"email" binding:"omitempty,email"`
+	Latitude  float64  `json:"latitude" binding:"required"`
+	Longitude float64  `json:"longitude" binding:"required"`
+	Tags      []string `json:"tags"`
 }
 
 type VoterInputMapped struct {
@@ -35,6 +37,7 @@ type VoterInputMapped struct {
 	Email     string
 	Latitude  float64
 	Longitude float64
+	Tags      []string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
