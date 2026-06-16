@@ -7,3 +7,8 @@ type SectorReport struct {
 	VotersCount int    `json:"voters_count"`
 	GeoJSON     string `json:"geojson"`
 }
+
+type DashboardMetrics struct {
+	TotalVoters  int `json:"total_voters"`
+	ActiveLeaders int `json:"active_leaders"`
+}

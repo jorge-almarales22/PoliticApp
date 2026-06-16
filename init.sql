@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS voters (
     phone       VARCHAR(50),
     email       VARCHAR(255),
     location    GEOMETRY(Point, 4326),
+    leader_id   UUID,
+    tags        TEXT[],
     campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
     created_at  TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ         NOT NULL DEFAULT NOW()

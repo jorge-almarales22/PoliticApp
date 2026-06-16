@@ -8,6 +8,7 @@ import (
 
 type Repository interface {
 	GetSectorsReport(ctx context.Context, campaignID string) ([]SectorReport, error)
+	GetDashboardMetrics(ctx context.Context, campaignID string) (*DashboardMetrics, error)
 }
 
 type repository struct {
@@ -47,4 +48,22 @@ func (r *repository) GetSectorsReport(ctx context.Context, campaignID string) ([
 	}
 
 	return reports, rows.Err()
+}
+
+const queryTotalVoters = `SELECT COUNT(*) FROM voters WHERE campaign_id = $1`
+
+const queryActiveLeaders = `SELECT COUNT(DISTINCT leader_id) FROM voters WHERE campaign_id = $1`
+
+func (r *repository) GetDashboardMetrics(ctx context.Context, campaignID string) (*DashboardMetrics, error) {
+	var metrics DashboardMetrics
+
+	if err := r.pool.QueryRow(ctx, queryTotalVoters, campaignID).Scan(&metrics.TotalVoters); err != nil {
+		return nil, err
+	}
+
+	if err := r.pool.QueryRow(ctx, queryActiveLeaders, campaignID).Scan(&metrics.ActiveLeaders); err != nil {
+		return nil, err
+	}
+
+	return &metrics, nil
 }
