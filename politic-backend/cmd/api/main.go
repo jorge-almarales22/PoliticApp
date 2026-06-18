@@ -124,6 +124,8 @@ func main() {
 
 		protected.POST("/voters", voterHandler.CreateVoter)
 		protected.GET("/voters", voterHandler.GetVoters)
+		protected.PUT("/voters/:id", voterHandler.UpdateVoter)
+		protected.DELETE("/voters/:id", voterHandler.DeleteVoter)
 
 		protected.POST("/scrutiny", scrutinyHandler.SubmitReport)
 		protected.GET("/scrutiny", scrutinyHandler.GetReports)
