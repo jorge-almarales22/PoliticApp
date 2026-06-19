@@ -27,6 +27,7 @@ type Repository interface {
 
 	CreateDispatch(ctx context.Context, campaignID string, d *Dispatch) error
 	GetDispatches(ctx context.Context, campaignID string) ([]DispatchDetail, error)
+	GetDispatchByID(ctx context.Context, id string) (*DispatchDetail, error)
 	ReceiveDispatch(ctx context.Context, id string) error
 }
 
@@ -93,7 +94,7 @@ const (
 		SELECT d.id, d.campaign_id, d.inventory_id, COALESCE(li.item_name, ''),
 		       d.quantity,
 		       d.receiver_id, COALESCE(u.full_name, ''),
-		       COALESCE(v.plate, ''),
+		       COALESCE(v.plate, ''), COALESCE(v.driver_name, ''),
 		       d.qr_code_token, d.status, d.created_at
 		FROM logistics_dispatches d
 		LEFT JOIN logistics_inventory li ON li.id = d.inventory_id
@@ -105,6 +106,17 @@ const (
 	queryReceiveDispatch = `
 		UPDATE logistics_dispatches SET status = 'ENTREGADO'
 		WHERE id = $1 AND status = 'EN_CAMINO'`
+
+	queryGetDispatchByID = `
+		SELECT d.id, d.campaign_id, d.inventory_id, COALESCE(li.item_name, ''), d.quantity,
+		       d.receiver_id, COALESCE(u.full_name, ''),
+		       COALESCE(v.plate, ''), COALESCE(v.driver_name, ''),
+		       d.qr_code_token, d.status, d.created_at
+		FROM logistics_dispatches d
+		LEFT JOIN logistics_inventory li ON li.id = d.inventory_id
+		LEFT JOIN users u ON u.id = d.receiver_id
+		LEFT JOIN vehicles v ON v.id = d.vehicle_id
+		WHERE d.id = $1`
 )
 
 func (r *repository) CreateDriver(ctx context.Context, d *Driver) error {
@@ -123,9 +135,13 @@ func (r *repository) GetDrivers(ctx context.Context) ([]Driver, error) {
 	var drivers []Driver
 	for rows.Next() {
 		var d Driver
-		if err := rows.Scan(&d.ID, &d.FullName, &d.Dni, &d.Address, &d.BloodType, &d.LicensePDFURL, &d.CreatedAt); err != nil {
+		var address, bloodType, licenseURL *string
+		if err := rows.Scan(&d.ID, &d.FullName, &d.Dni, &address, &bloodType, &licenseURL, &d.CreatedAt); err != nil {
 			return nil, err
 		}
+		if address != nil { d.Address = *address }
+		if bloodType != nil { d.BloodType = *bloodType }
+		if licenseURL != nil { d.LicensePDFURL = *licenseURL }
 		drivers = append(drivers, d)
 	}
 	return drivers, rows.Err()
@@ -247,7 +263,7 @@ func (r *repository) GetDispatches(ctx context.Context, campaignID string) ([]Di
 	for rows.Next() {
 		var d DispatchDetail
 		if err := rows.Scan(&d.ID, &d.CampaignID, &d.InventoryID, &d.ItemName, &d.Quantity,
-			&d.ReceiverID, &d.ReceiverName, &d.VehiclePlate,
+			&d.ReceiverID, &d.ReceiverName, &d.VehiclePlate, &d.DriverName,
 			&d.QRCodeToken, &d.Status, &d.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -255,6 +271,18 @@ func (r *repository) GetDispatches(ctx context.Context, campaignID string) ([]Di
 		list = append(list, d)
 	}
 	return list, rows.Err()
+}
+
+func (r *repository) GetDispatchByID(ctx context.Context, id string) (*DispatchDetail, error) {
+	var d DispatchDetail
+	if err := r.pool.QueryRow(ctx, queryGetDispatchByID, id).Scan(
+		&d.ID, &d.CampaignID, &d.InventoryID, &d.ItemName, &d.Quantity,
+		&d.ReceiverID, &d.ReceiverName, &d.VehiclePlate, &d.DriverName,
+		&d.QRCodeToken, &d.Status, &d.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &d, nil
 }
 
 func (r *repository) ReceiveDispatch(ctx context.Context, id string) error {

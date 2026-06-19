@@ -1,6 +1,7 @@
 package voter
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ func (h *Handler) CreateVoter(c *gin.Context) {
 
 	voter, err := h.service.CreateVoter(c.Request.Context(), input, campaignID)
 	if err != nil {
+		log.Printf("ERROR CreateVoter: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al registrar votante"})
 		return
 	}
@@ -45,6 +47,7 @@ func (h *Handler) GetVoters(c *gin.Context) {
 
 	voters, err := h.service.GetVoters(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetVoters: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar votantes"})
 		return
 	}
@@ -73,6 +76,7 @@ func (h *Handler) UpdateVoter(c *gin.Context) {
 
 	voter, err := h.service.UpdateVoter(c.Request.Context(), id, campaignID, input)
 	if err != nil {
+		log.Printf("ERROR UpdateVoter: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al actualizar votante"})
 		return
 	}
@@ -94,6 +98,7 @@ func (h *Handler) DeleteVoter(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteVoter(c.Request.Context(), id, campaignID); err != nil {
+		log.Printf("ERROR DeleteVoter: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al eliminar votante"})
 		return
 	}

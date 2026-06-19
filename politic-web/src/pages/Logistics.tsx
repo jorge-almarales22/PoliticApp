@@ -147,7 +147,7 @@ export default function Logistics() {
     try {
       const res = await api.post<{ dispatch: { qr_code_token: string; id: string } }>('/logistics/dispatch', { inventory_id: dispInvId, receiver_id: dispRcvId, vehicle_id: dispVehId || undefined, quantity: parseInt(dispQty, 10) })
       const token = res.data.dispatch.qr_code_token
-      const qrUrl = `${window.location.origin}/logistics/verify?dispatch_id=${res.data.dispatch.id}`
+      const qrUrl = `http://192.168.40.39:5173/logistics/verify/${res.data.dispatch.id}`
       const dataUrl = await QRCode.toDataURL(qrUrl, { width: 240, margin: 2 })
       setQrToken(token); setQrUrl(dataUrl)
       setAlert({ type: 'success', message: 'Despacho creado' })

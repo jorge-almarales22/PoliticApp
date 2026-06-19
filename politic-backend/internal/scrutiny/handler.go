@@ -1,7 +1,7 @@
 package scrutiny
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -48,17 +48,12 @@ func (h *Handler) SubmitReport(c *gin.Context) {
 		return
 	}
 
-	cvJSON, err := json.Marshal(cv)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al serializar candidate_votes"})
-		return
-	}
-
 	var e14ImageURL string
 	file, err := c.FormFile("e14_image")
 	if err == nil {
 		uploadDir := "./uploads/e14"
 		if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+			log.Printf("ERROR SubmitReport MkdirAll: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear directorio de uploads"})
 			return
 		}
@@ -68,6 +63,7 @@ func (h *Handler) SubmitReport(c *gin.Context) {
 		filePath := filepath.Join(uploadDir, filename)
 
 		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			log.Printf("ERROR SubmitReport SaveUploadedFile: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la imagen E-14"})
 			return
 		}
@@ -83,11 +79,12 @@ func (h *Handler) SubmitReport(c *gin.Context) {
 		Zone:           input.Zone,
 		VotosBlanco:    input.VotosBlanco,
 		VotosNulos:     input.VotosNulos,
-		CandidateVotes: string(cvJSON),
+		CandidateVotes: cv,
 		E14ImageURL:    e14ImageURL,
 	}
 
 	if err := h.service.ProcessReport(c.Request.Context(), report); err != nil {
+		log.Printf("ERROR SubmitReport ProcessReport: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al procesar el reporte de escrutinio"})
 		return
 	}
@@ -104,6 +101,7 @@ func (h *Handler) GetReports(c *gin.Context) {
 
 	reports, err := h.service.GetReports(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetReports: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar reportes de escrutinio"})
 		return
 	}

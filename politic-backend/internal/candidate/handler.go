@@ -1,6 +1,7 @@
 package candidate
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -53,12 +54,14 @@ func (h *Handler) CreateCandidate(c *gin.Context) {
 
 	photoURL, err := saveUploadedPhoto(c, "photo", "./uploads/candidates", "")
 	if err != nil {
+		log.Printf("ERROR al guardar foto de candidato: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la foto del candidato"})
 		return
 	}
 
 	candidate, err := h.service.CreateCandidate(c.Request.Context(), input, campaignID, photoURL)
 	if err != nil {
+		log.Printf("ERROR al crear candidato: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al crear candidato"})
 		return
 	}
@@ -75,6 +78,7 @@ func (h *Handler) GetCandidates(c *gin.Context) {
 
 	candidates, err := h.service.GetCandidates(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetCandidates: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar candidatos"})
 		return
 	}
@@ -109,12 +113,14 @@ func (h *Handler) UpdateCandidate(c *gin.Context) {
 
 	photoURL, err := saveUploadedPhoto(c, "photo", "./uploads/candidates", existing.PhotoURL)
 	if err != nil {
+		log.Printf("ERROR al guardar foto de candidato (update): %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la foto del candidato"})
 		return
 	}
 
 	candidate, err := h.service.UpdateCandidate(c.Request.Context(), id, campaignID, input, photoURL)
 	if err != nil {
+		log.Printf("ERROR al actualizar candidato: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al actualizar candidato"})
 		return
 	}
@@ -136,6 +142,7 @@ func (h *Handler) DeleteCandidate(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteCandidate(c.Request.Context(), id, campaignID); err != nil {
+		log.Printf("ERROR DeleteCandidate: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al eliminar candidato"})
 		return
 	}

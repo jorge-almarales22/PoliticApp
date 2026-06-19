@@ -47,6 +47,7 @@ type DispatchDetail struct {
 	ReceiverID    string    `json:"receiver_id"`
 	ReceiverName  string    `json:"receiver_name,omitempty"`
 	VehiclePlate  string    `json:"vehicle_plate,omitempty"`
+	DriverName    string    `json:"driver_name,omitempty"`
 	QRCodeToken   string    `json:"qr_code_token"`
 	Status        string    `json:"status"`
 	CreatedAt     time.Time `json:"created_at"`

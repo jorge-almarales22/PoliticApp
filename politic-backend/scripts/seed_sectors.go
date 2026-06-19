@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -26,7 +27,7 @@ const (
 	geojsonPath     = "scripts/data/colombia_sectores.geojson"
 	campaignID      = "8f4b23a1-1234-4bc5-9c87-6e5d4c3b2a1a"
 	targetMunicipio = "20001"
-	sectorType      = "COMUNA"
+	sectorType      = "SECTOR_DANE"
 )
 
 var municipioKeys = []string{
@@ -40,16 +41,27 @@ var nombreKeys = []string{
 	"NOMBRE", "NOM_SETU", "nombre", "name", "codigo",
 }
 
+var htmlReplacer = strings.NewReplacer(
+	"\u00e1", "&aacute;", "\u00e9", "&eacute;", "\u00ed", "&iacute;", "\u00f3", "&oacute;", "\u00fa", "&uacute;",
+	"\u00c1", "&Aacute;", "\u00c9", "&Eacute;", "\u00cd", "&Iacute;", "\u00d3", "&Oacute;", "\u00da", "&Uacute;",
+	"\u00f1", "&ntilde;", "\u00d1", "&Ntilde;",
+	"\u00fc", "&uuml;", "\u00dc", "&Uuml;",
+)
+
+func sanitizeText(text string) string {
+	return htmlReplacer.Replace(text)
+}
+
 func main() {
 	log.Println("=== Seed de Sectores GeoJSON (DANE) para Valledupar ===")
 
 	if err := godotenv.Load(); err != nil {
-		log.Println("Aviso: No se encontró archivo .env, usando variables de entorno del sistema")
+		log.Println("Aviso: No se encontro archivo .env, usando variables de entorno del sistema")
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("Error crítico: DATABASE_URL no está definida en el entorno")
+		log.Fatal("Error critico: DATABASE_URL no esta definida en el entorno")
 	}
 
 	log.Println("-> Abriendo archivo GeoJSON:", geojsonPath)
@@ -77,7 +89,7 @@ func main() {
 	if err := pool.Ping(ctx); err != nil {
 		log.Fatalf("Error: No se pudo hacer ping a PostgreSQL: %v", err)
 	}
-	log.Println("-> Conexión a PostgreSQL exitosa")
+	log.Println("-> Conexion a PostgreSQL exitosa")
 
 	insertados := 0
 	ignorados := 0
@@ -96,9 +108,10 @@ func main() {
 		}
 
 		nombre := extraerNombre(props, i)
+		nombre = sanitizeText(nombre)
 
 		if len(feat.Geometry) == 0 || string(feat.Geometry) == "null" {
-			log.Printf("  [%d] Advertencia: geometría nula para sector '%s', se omite\n", i, nombre)
+			log.Printf("  [%d] Advertencia: geometria nula para sector '%s', se omite\n", i, nombre)
 			ignorados++
 			continue
 		}
@@ -120,7 +133,7 @@ func main() {
 	log.Printf("Resumen: %d insertados, %d ignorados (de %d total)\n", insertados, ignorados, totalFeatures)
 	log.Println("=== Seed finalizado ===")
 	if insertados == 0 {
-		log.Println("ADVERTENCIA: No se insertó ningún sector. Verifica que el código de municipio sea correcto y que las llaves de propiedades coincidan con las del GeoJSON del DANE.")
+		log.Println("ADVERTENCIA: No se inserto ningun sector. Verifica que el codigo de municipio sea correcto y que las llaves de propiedades coincidan con las del GeoJSON del DANE.")
 	}
 }
 

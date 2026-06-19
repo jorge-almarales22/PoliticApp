@@ -53,12 +53,17 @@ func (r *repository) GetByCampaign(ctx context.Context, campaignID string) ([]Vo
 	var voters []Voter
 	for rows.Next() {
 		var v Voter
+		var dni, address, phone, email *string
 		if err := rows.Scan(
-			&v.ID, &v.FullName, &v.Dni, &v.Address, &v.Phone, &v.Email,
+			&v.ID, &v.FullName, &dni, &address, &phone, &email,
 			&v.Longitude, &v.Latitude, &v.CampaignID, &v.Tags, &v.CreatedAt, &v.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
+		if dni != nil { v.Dni = *dni }
+		if address != nil { v.Address = *address }
+		if phone != nil { v.Phone = *phone }
+		if email != nil { v.Email = *email }
 		voters = append(voters, v)
 	}
 

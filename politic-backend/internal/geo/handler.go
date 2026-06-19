@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ func (h *Handler) GetSectorsReport(c *gin.Context) {
 
 	reports, err := h.service.GetSectorsReport(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetSectorsReport: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar reporte de sectores"})
 		return
 	}
@@ -39,7 +41,8 @@ func (h *Handler) GetDashboardMetrics(c *gin.Context) {
 
 	metrics, err := h.service.GetDashboardMetrics(c.Request.Context(), campaignID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar métricas del dashboard"})
+		log.Printf("ERROR GetDashboardMetrics: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al consultar metricas del dashboard"})
 		return
 	}
 

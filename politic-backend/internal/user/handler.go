@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ func (h *Handler) Register(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		log.Printf("ERROR Register: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al registrar usuario"})
 		return
 	}
@@ -49,7 +51,8 @@ func (h *Handler) Login(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al iniciar sesión"})
+		log.Printf("ERROR Login: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno al iniciar sesion"})
 		return
 	}
 
@@ -65,6 +68,7 @@ func (h *Handler) GetUsers(c *gin.Context) {
 
 	users, err := h.service.GetUsersByCampaign(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetUsers: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar usuarios"})
 		return
 	}

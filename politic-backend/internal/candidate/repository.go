@@ -63,9 +63,13 @@ func (r *repository) GetByCampaign(ctx context.Context, campaignID string) ([]Ca
 	var candidates []Candidate
 	for rows.Next() {
 		var c Candidate
-		if err := rows.Scan(&c.ID, &c.CampaignID, &c.FullName, &c.Email, &c.Phone, &c.PhotoURL, &c.IsMain, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		var email, phone, photoURL *string
+		if err := rows.Scan(&c.ID, &c.CampaignID, &c.FullName, &email, &phone, &photoURL, &c.IsMain, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
+		if email != nil { c.Email = *email }
+		if phone != nil { c.Phone = *phone }
+		if photoURL != nil { c.PhotoURL = *photoURL }
 		candidates = append(candidates, c)
 	}
 	return candidates, rows.Err()
@@ -73,11 +77,15 @@ func (r *repository) GetByCampaign(ctx context.Context, campaignID string) ([]Ca
 
 func (r *repository) GetByID(ctx context.Context, id string, campaignID string) (*Candidate, error) {
 	var c Candidate
+	var email, phone, photoURL *string
 	if err := r.pool.QueryRow(ctx, queryGetByID, id, campaignID).Scan(
-		&c.ID, &c.CampaignID, &c.FullName, &c.Email, &c.Phone, &c.PhotoURL, &c.IsMain, &c.CreatedAt, &c.UpdatedAt,
+		&c.ID, &c.CampaignID, &c.FullName, &email, &phone, &photoURL, &c.IsMain, &c.CreatedAt, &c.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
+	if email != nil { c.Email = *email }
+	if phone != nil { c.Phone = *phone }
+	if photoURL != nil { c.PhotoURL = *photoURL }
 	return &c, nil
 }
 

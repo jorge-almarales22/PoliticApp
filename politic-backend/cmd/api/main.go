@@ -113,13 +113,11 @@ func main() {
 
 	// Servir archivos estaticos (imagenes E-14, inventario, vehiculos, licencias)
 	router.Static("/uploads", "./uploads")
-	router.Static("/uploads/inventario", "./inventario")
-	router.Static("/uploads/vehiculos", "./vehiculos")
-	router.Static("/uploads/licencias", "./licencias")
 
-	// Rutas protegidas (requieren token JWT válido)
+	// Rutas protegidas (requieren token JWT valido)
 	protected := router.Group("/api/v1")
 	protected.Use(middleware.AuthMiddleware(jwtSecret))
+	protected.Use(middleware.ValidateCampaign(dbPool))
 	{
 		protected.GET("/test-auth", func(c *gin.Context) {
 			campaignID := c.GetString("campaign_id")
@@ -157,6 +155,7 @@ func main() {
 
 		protected.POST("/logistics/dispatch", logisticsHandler.SubmitDispatch)
 		protected.GET("/logistics/dispatch", logisticsHandler.GetDispatches)
+		protected.GET("/logistics/dispatch/:id", logisticsHandler.GetDispatch)
 		protected.POST("/logistics/dispatch/:id/receive", logisticsHandler.ReceiveDispatch)
 
 		protected.GET("/geo/sectors", geoHandler.GetSectorsReport)

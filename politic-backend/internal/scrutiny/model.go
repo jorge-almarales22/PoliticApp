@@ -6,21 +6,18 @@ import (
 )
 
 type ScrutinyReport struct {
-	ID             string    `json:"id"`
-	CampaignID     string    `json:"campaign_id"`
-	WitnessID      string    `json:"witness_id"`
-	VotingPlace    string    `json:"voting_place"`
-	TableNumber    int       `json:"table_number"`
-	Zone           string    `json:"zone,omitempty"`
-	VotosBlanco    int       `json:"votos_blanco"`
-	VotosNulos     int       `json:"votos_nulos"`
-	VotesCandidate int       `json:"votes_candidate"`
-	VotesRival1    int       `json:"votes_rival_1"`
-	VotesRival2    int       `json:"votes_rival_2"`
-	CandidateVotes string    `json:"candidate_votes"`
-	E14ImageURL    string    `json:"e14_image_url,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID             string              `json:"id"`
+	CampaignID     string              `json:"campaign_id"`
+	WitnessID      string              `json:"witness_id"`
+	VotingPlace    string              `json:"voting_place"`
+	TableNumber    int                 `json:"table_number"`
+	Zone           string              `json:"zone,omitempty"`
+	VotosBlanco    int                 `json:"votos_blanco"`
+	VotosNulos     int                 `json:"votos_nulos"`
+	CandidateVotes []CandidateVoteEntry `json:"candidate_votes"`
+	E14ImageURL    string              `json:"e14_image_url,omitempty"`
+	CreatedAt      time.Time           `json:"created_at"`
+	UpdatedAt      time.Time           `json:"updated_at"`
 }
 
 type CandidateVoteEntry struct {

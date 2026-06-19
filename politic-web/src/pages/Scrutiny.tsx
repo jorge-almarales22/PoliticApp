@@ -31,7 +31,7 @@ interface ScrutinyReport {
   zone: string
   votos_blanco: number
   votos_nulos: number
-  candidate_votes: string
+  candidate_votes: CandidateVote[]
   e14_image_url: string
   created_at: string
   updated_at: string
@@ -223,10 +223,6 @@ export default function Scrutiny() {
   const canSubmit = hasMesaData && !submitting && !compressing
   const busy = submitting || compressing
 
-  const parseCandidateVotesStr = (raw: string): CandidateVote[] => {
-    try { return JSON.parse(raw || '[]') } catch { return [] }
-  }
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -405,7 +401,7 @@ export default function Scrutiny() {
             {!reportsLoading && !reportsError && reports.length > 0 && (
               <div className="divide-y divide-slate-50">
                 {reports.map((report) => {
-                  const cv = parseCandidateVotesStr(report.candidate_votes)
+                  const cv = report.candidate_votes ?? []
                   return (
                     <div key={report.id} className="px-6 py-4 flex items-start gap-4 hover:bg-slate-50/60 transition-colors">
                       {report.e14_image_url ? (

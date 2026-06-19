@@ -15,6 +15,7 @@ type Service interface {
 
 	SubmitDispatch(ctx context.Context, input CreateDispatchInput, campaignID string) (*Dispatch, error)
 	GetDispatches(ctx context.Context, campaignID string) ([]DispatchDetail, error)
+	GetDispatchByID(ctx context.Context, id string) (*DispatchDetail, error)
 	ReceiveDispatch(ctx context.Context, id string) error
 }
 
@@ -104,6 +105,10 @@ func (s *service) SubmitDispatch(ctx context.Context, input CreateDispatchInput,
 
 func (s *service) GetDispatches(ctx context.Context, campaignID string) ([]DispatchDetail, error) {
 	return s.repo.GetDispatches(ctx, campaignID)
+}
+
+func (s *service) GetDispatchByID(ctx context.Context, id string) (*DispatchDetail, error) {
+	return s.repo.GetDispatchByID(ctx, id)
 }
 
 func (s *service) ReceiveDispatch(ctx context.Context, id string) error {

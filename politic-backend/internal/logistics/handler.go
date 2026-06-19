@@ -2,6 +2,7 @@ package logistics
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,12 +26,14 @@ func saveUploaded(c *gin.Context, formKey string, dir string) string {
 	}
 	fullDir := filepath.Join(".", "uploads", dir)
 	if err := os.MkdirAll(fullDir, os.ModePerm); err != nil {
+		log.Printf("ERROR saveUploaded MkdirAll(%s): %v", fullDir, err)
 		return ""
 	}
 	ext := filepath.Ext(file.Filename)
 	filename := uuid.New().String() + ext
 	filePath := filepath.Join(fullDir, filename)
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		log.Printf("ERROR saveUploaded SaveUploadedFile(%s): %v", filePath, err)
 		return ""
 	}
 	return "/uploads/" + dir + "/" + filename
@@ -45,6 +48,7 @@ func (h *Handler) CreateDriver(c *gin.Context) {
 	licenseURL := saveUploaded(c, "license_pdf", "licencias")
 	driver, err := h.service.CreateDriver(c.Request.Context(), input, licenseURL)
 	if err != nil {
+		log.Printf("ERROR CreateDriver: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear conductor"})
 		return
 	}
@@ -54,6 +58,7 @@ func (h *Handler) CreateDriver(c *gin.Context) {
 func (h *Handler) GetDrivers(c *gin.Context) {
 	drivers, err := h.service.GetDrivers(c.Request.Context())
 	if err != nil {
+		log.Printf("ERROR GetDrivers: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar conductores"})
 		return
 	}
@@ -76,6 +81,7 @@ func (h *Handler) CreateVehicle(c *gin.Context) {
 	tecnoURL := saveUploaded(c, "tecnomecanica_pdf", "vehiculos")
 	vehicle, err := h.service.CreateVehicle(c.Request.Context(), input, campaignID, imageURL, soatURL, tecnoURL)
 	if err != nil {
+		log.Printf("ERROR CreateVehicle: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear vehiculo"})
 		return
 	}
@@ -90,6 +96,7 @@ func (h *Handler) GetVehicles(c *gin.Context) {
 	}
 	vehicles, err := h.service.GetVehicles(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetVehicles: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar vehiculos"})
 		return
 	}
@@ -109,6 +116,7 @@ func (h *Handler) UpdateVehicleStatus(c *gin.Context) {
 		return
 	}
 	if err := h.service.UpdateVehicleStatus(c.Request.Context(), id, campaignID, body.Status); err != nil {
+		log.Printf("ERROR UpdateVehicleStatus: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar estado"})
 		return
 	}
@@ -129,6 +137,7 @@ func (h *Handler) CreateInventory(c *gin.Context) {
 	imageURL := saveUploaded(c, "image", "inventario")
 	item, err := h.service.CreateInventory(c.Request.Context(), input, campaignID, imageURL)
 	if err != nil {
+		log.Printf("ERROR CreateInventory: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear item"})
 		return
 	}
@@ -143,6 +152,7 @@ func (h *Handler) GetInventory(c *gin.Context) {
 	}
 	items, err := h.service.GetInventory(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetInventory: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar inventario"})
 		return
 	}
@@ -170,6 +180,7 @@ func (h *Handler) SubmitDispatch(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
+		log.Printf("ERROR SubmitDispatch: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear despacho"})
 		return
 	}
@@ -184,15 +195,28 @@ func (h *Handler) GetDispatches(c *gin.Context) {
 	}
 	list, err := h.service.GetDispatches(c.Request.Context(), campaignID)
 	if err != nil {
+		log.Printf("ERROR GetDispatches: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar despachos"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"dispatches": list})
 }
 
+func (h *Handler) GetDispatch(c *gin.Context) {
+	id := c.Param("id")
+	d, err := h.service.GetDispatchByID(c.Request.Context(), id)
+	if err != nil {
+		log.Printf("ERROR GetDispatch: %v", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Despacho no encontrado"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"dispatch": d})
+}
+
 func (h *Handler) ReceiveDispatch(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.service.ReceiveDispatch(c.Request.Context(), id); err != nil {
+		log.Printf("ERROR ReceiveDispatch: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al confirmar recepcion"})
 		return
 	}
