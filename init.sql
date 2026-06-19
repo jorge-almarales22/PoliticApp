@@ -3,12 +3,16 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TYPE user_role AS ENUM ('admin', 'manager', 'analyst', 'viewer');
 
+-- ============================================================
+-- TABLAS PRINCIPALES
+-- ============================================================
+
 CREATE TABLE IF NOT EXISTS campaigns (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name       VARCHAR(255) NOT NULL,
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name        VARCHAR(255) NOT NULL,
     description TEXT,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -21,6 +25,24 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ         NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS candidates (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    full_name   VARCHAR(255) NOT NULL,
+    email       VARCHAR(255),
+    phone       VARCHAR(50),
+    photo_url   TEXT,
+    is_main     BOOLEAN      NOT NULL DEFAULT false,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_candidates_campaign ON candidates (campaign_id);
+
+-- ============================================================
+-- VOTANTES (PostGIS)
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS voters (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -37,8 +59,11 @@ CREATE TABLE IF NOT EXISTS voters (
     updated_at  TIMESTAMPTZ         NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_voters_location
-    ON voters USING GIST (location);
+CREATE INDEX IF NOT EXISTS idx_voters_location ON voters USING GIST (location);
+
+-- ============================================================
+-- ESCRUTINIO
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS scrutiny_reports (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,31 +71,23 @@ CREATE TABLE IF NOT EXISTS scrutiny_reports (
     witness_id      UUID         NOT NULL,
     voting_place    VARCHAR(255) NOT NULL,
     table_number    INTEGER      NOT NULL,
-    votes_candidate INTEGER      NOT NULL,
+    zone            VARCHAR(100),
+    votes_candidate INTEGER      NOT NULL DEFAULT 0,
     votes_rival_1   INTEGER      NOT NULL DEFAULT 0,
     votes_rival_2   INTEGER      NOT NULL DEFAULT 0,
+    votos_blanco    INTEGER      NOT NULL DEFAULT 0,
+    votos_nulos     INTEGER      NOT NULL DEFAULT 0,
+    candidate_votes JSONB        NOT NULL DEFAULT '[]'::jsonb,
     e14_image_url   TEXT,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign
-    ON scrutiny_reports (campaign_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign ON scrutiny_reports (campaign_id, created_at DESC);
 
-CREATE TABLE IF NOT EXISTS vehicles (
-    id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    campaign_id          UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-    plate                VARCHAR(20)  NOT NULL,
-    model                VARCHAR(100),
-    driver_id            UUID,
-    driver_name          VARCHAR(255),
-    driver_phone         VARCHAR(50),
-    status               VARCHAR(50)  NOT NULL DEFAULT 'DISPONIBLE',
-    image_url            TEXT,
-    soat_pdf_url         TEXT,
-    tecnomecanica_pdf_url TEXT,
-    created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
+-- ============================================================
+-- LOGISTICA: Conductores
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS drivers (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -81,6 +98,31 @@ CREATE TABLE IF NOT EXISTS drivers (
     license_pdf_url TEXT,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
+-- ============================================================
+-- LOGISTICA: Vehiculos
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS vehicles (
+    id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id           UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    plate                 VARCHAR(20)  NOT NULL,
+    model                 VARCHAR(100),
+    driver_id             UUID,
+    driver_name           VARCHAR(255),
+    driver_phone          VARCHAR(50),
+    status                VARCHAR(50)  NOT NULL DEFAULT 'DISPONIBLE',
+    image_url             TEXT,
+    soat_pdf_url          TEXT,
+    tecnomecanica_pdf_url TEXT,
+    created_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_vehicles_campaign ON vehicles (campaign_id);
+
+-- ============================================================
+-- LOGISTICA: Inventario
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS logistics_inventory (
     id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -93,50 +135,9 @@ CREATE TABLE IF NOT EXISTS logistics_inventory (
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS campaign_sectors (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-    name        VARCHAR(255) NOT NULL,
-    sector_type VARCHAR(50)  NOT NULL,
-    boundary    GEOMETRY(Geometry, 4326) NOT NULL,
-    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_campaign_sectors_boundary
-    ON campaign_sectors USING GIST (boundary);
-
-CREATE TABLE IF NOT EXISTS candidates (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-    full_name   VARCHAR(255) NOT NULL,
-    email       VARCHAR(255),
-    phone       VARCHAR(50),
-    photo_url   TEXT,
-    is_main     BOOLEAN      NOT NULL DEFAULT false,
-    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-
-DO $$ BEGIN
-    ALTER TABLE scrutiny_reports ADD COLUMN zone VARCHAR(100);
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE scrutiny_reports ADD COLUMN votos_blanco INTEGER NOT NULL DEFAULT 0;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE scrutiny_reports ADD COLUMN votos_nulos INTEGER NOT NULL DEFAULT 0;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE scrutiny_reports ADD COLUMN candidate_votes JSONB NOT NULL DEFAULT '[]'::jsonb;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+-- ============================================================
+-- LOGISTICA: Despachos
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS logistics_dispatches (
     id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -150,37 +151,18 @@ CREATE TABLE IF NOT EXISTS logistics_dispatches (
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-DO $$ BEGIN
-    ALTER TABLE logistics_dispatches ADD COLUMN vehicle_id UUID;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+-- ============================================================
+-- SECTORES (PostGIS)
+-- ============================================================
 
-DO $$ BEGIN
-    ALTER TABLE logistics_dispatches ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'EN_CAMINO';
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+CREATE TABLE IF NOT EXISTS campaign_sectors (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    name        VARCHAR(255) NOT NULL,
+    sector_type VARCHAR(50)  NOT NULL,
+    boundary    GEOMETRY(Geometry, 4326) NOT NULL,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
 
-DO $$ BEGIN
-    ALTER TABLE logistics_inventory ADD COLUMN image_url TEXT;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE vehicles ADD COLUMN driver_id UUID;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE vehicles ADD COLUMN image_url TEXT;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE vehicles ADD COLUMN soat_pdf_url TEXT;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE vehicles ADD COLUMN tecnomecanica_pdf_url TEXT;
-EXCEPTION WHEN duplicate_column THEN NULL;
-END $$;
+CREATE INDEX IF NOT EXISTS idx_campaign_sectors_boundary ON campaign_sectors USING GIST (boundary);
