@@ -55,3 +55,19 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *Handler) GetUsers(c *gin.Context) {
+	campaignID := c.GetString("campaign_id")
+	if campaignID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No autorizado"})
+		return
+	}
+
+	users, err := h.service.GetUsersByCampaign(c.Request.Context(), campaignID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar usuarios"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
+}

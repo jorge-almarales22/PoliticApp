@@ -17,6 +17,7 @@ var (
 type Service interface {
 	Register(ctx context.Context, input RegisterInput) (*RegisterOutput, error)
 	Login(ctx context.Context, input LoginInput, secret string) (*LoginOutput, error)
+	GetUsersByCampaign(ctx context.Context, campaignID string) ([]User, error)
 }
 
 type RegisterOutput struct {
@@ -104,4 +105,8 @@ func (s *service) Login(ctx context.Context, input LoginInput, secret string) (*
 		Token: signedToken,
 		User:  *user,
 	}, nil
+}
+
+func (s *service) GetUsersByCampaign(ctx context.Context, campaignID string) ([]User, error) {
+	return s.repo.GetByCampaign(ctx, campaignID)
 }

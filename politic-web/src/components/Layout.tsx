@@ -1,12 +1,14 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, ClipboardCheck, LogOut, ChevronLeft } from 'lucide-react'
+import { LayoutDashboard, Users, ClipboardCheck, UserSquare2, Truck, LogOut, ChevronLeft } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useCallback } from 'react'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/candidates', label: 'Candidatos', icon: UserSquare2 },
   { to: '/voters', label: 'Votantes', icon: Users },
   { to: '/scrutiny', label: 'Escrutinio', icon: ClipboardCheck },
+  { to: '/logistics', label: 'Logistica', icon: Truck },
 ]
 
 const styles = {

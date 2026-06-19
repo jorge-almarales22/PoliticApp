@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
+	"politic-backend/internal/candidate"
 	"politic-backend/internal/geo"
 	"politic-backend/internal/logistics"
 	"politic-backend/internal/scrutiny"
@@ -77,6 +78,10 @@ func main() {
 	logisticsSvc := logistics.NewService(logisticsRepo)
 	logisticsHandler := logistics.NewHandler(logisticsSvc)
 
+	candidateRepo := candidate.NewRepository(dbPool)
+	candidateSvc := candidate.NewService(candidateRepo)
+	candidateHandler := candidate.NewHandler(candidateSvc)
+
 	// 4. Inicializar el Router de Gin y montar rutas
 	router := gin.Default()
 
@@ -106,8 +111,11 @@ func main() {
 		auth.POST("/login", userHandler.Login)
 	}
 
-	// Servir archivos estáticos (imágenes E-14 subidas por testigos)
+	// Servir archivos estaticos (imagenes E-14, inventario, vehiculos, licencias)
 	router.Static("/uploads", "./uploads")
+	router.Static("/uploads/inventario", "./inventario")
+	router.Static("/uploads/vehiculos", "./vehiculos")
+	router.Static("/uploads/licencias", "./licencias")
 
 	// Rutas protegidas (requieren token JWT válido)
 	protected := router.Group("/api/v1")
@@ -130,10 +138,26 @@ func main() {
 		protected.POST("/scrutiny", scrutinyHandler.SubmitReport)
 		protected.GET("/scrutiny", scrutinyHandler.GetReports)
 
+		protected.GET("/candidates", candidateHandler.GetCandidates)
+		protected.POST("/candidates", candidateHandler.CreateCandidate)
+		protected.PUT("/candidates/:id", candidateHandler.UpdateCandidate)
+		protected.DELETE("/candidates/:id", candidateHandler.DeleteCandidate)
+
+		protected.GET("/users", userHandler.GetUsers)
+
+		protected.POST("/logistics/drivers", logisticsHandler.CreateDriver)
+		protected.GET("/logistics/drivers", logisticsHandler.GetDrivers)
+
 		protected.POST("/logistics/vehicles", logisticsHandler.CreateVehicle)
 		protected.GET("/logistics/vehicles", logisticsHandler.GetVehicles)
+		protected.PATCH("/logistics/vehicles/:id/status", logisticsHandler.UpdateVehicleStatus)
+
 		protected.POST("/logistics/inventory", logisticsHandler.CreateInventory)
+		protected.GET("/logistics/inventory", logisticsHandler.GetInventory)
+
 		protected.POST("/logistics/dispatch", logisticsHandler.SubmitDispatch)
+		protected.GET("/logistics/dispatch", logisticsHandler.GetDispatches)
+		protected.POST("/logistics/dispatch/:id/receive", logisticsHandler.ReceiveDispatch)
 
 		protected.GET("/geo/sectors", geoHandler.GetSectorsReport)
 		protected.GET("/geo/dashboard-metrics", geoHandler.GetDashboardMetrics)

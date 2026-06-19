@@ -3,6 +3,9 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Voters from './pages/Voters'
 import Scrutiny from './pages/Scrutiny'
+import Candidates from './pages/Candidates'
+import Logistics from './pages/Logistics'
+import LogisticsVerify from './pages/LogisticsVerify'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -11,12 +14,15 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/logistics/verify" element={<LogisticsVerify />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/voters" element={<Voters />} />
             <Route path="/scrutiny" element={<Scrutiny />} />
+            <Route path="/candidates" element={<Candidates />} />
+            <Route path="/logistics" element={<Logistics />} />
           </Route>
         </Route>
 

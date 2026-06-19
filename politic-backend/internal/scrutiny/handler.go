@@ -1,6 +1,7 @@
 package scrutiny
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -36,6 +37,23 @@ func (h *Handler) SubmitReport(c *gin.Context) {
 		return
 	}
 
+	candidateVotes := input.CandidateVotes
+	if candidateVotes == "" {
+		candidateVotes = "[]"
+	}
+
+	cv, err := ParseCandidateVotes(candidateVotes)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato invalido en candidate_votes: debe ser un arreglo JSON"})
+		return
+	}
+
+	cvJSON, err := json.Marshal(cv)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al serializar candidate_votes"})
+		return
+	}
+
 	var e14ImageURL string
 	file, err := c.FormFile("e14_image")
 	if err == nil {
@@ -62,9 +80,10 @@ func (h *Handler) SubmitReport(c *gin.Context) {
 		WitnessID:      witnessID,
 		VotingPlace:    input.VotingPlace,
 		TableNumber:    input.TableNumber,
-		VotesCandidate: input.VotesCandidate,
-		VotesRival1:    input.VotesRival1,
-		VotesRival2:    input.VotesRival2,
+		Zone:           input.Zone,
+		VotosBlanco:    input.VotosBlanco,
+		VotosNulos:     input.VotosNulos,
+		CandidateVotes: string(cvJSON),
 		E14ImageURL:    e14ImageURL,
 	}
 

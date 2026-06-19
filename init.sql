@@ -58,14 +58,28 @@ CREATE INDEX IF NOT EXISTS idx_scrutiny_reports_campaign
     ON scrutiny_reports (campaign_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS vehicles (
-    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    campaign_id  UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-    plate        VARCHAR(20)  NOT NULL,
-    model        VARCHAR(100),
-    driver_name  VARCHAR(255) NOT NULL,
-    driver_phone VARCHAR(50),
-    status       VARCHAR(50)  NOT NULL DEFAULT 'DISPONIBLE',
-    created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id          UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    plate                VARCHAR(20)  NOT NULL,
+    model                VARCHAR(100),
+    driver_id            UUID,
+    driver_name          VARCHAR(255),
+    driver_phone         VARCHAR(50),
+    status               VARCHAR(50)  NOT NULL DEFAULT 'DISPONIBLE',
+    image_url            TEXT,
+    soat_pdf_url         TEXT,
+    tecnomecanica_pdf_url TEXT,
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS drivers (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name       VARCHAR(255) NOT NULL,
+    dni             VARCHAR(50)  NOT NULL,
+    address         TEXT,
+    blood_type      VARCHAR(10),
+    license_pdf_url TEXT,
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS logistics_inventory (
@@ -75,6 +89,7 @@ CREATE TABLE IF NOT EXISTS logistics_inventory (
     item_type     VARCHAR(50)  NOT NULL,
     total_qty     INTEGER      NOT NULL,
     allocated_qty INTEGER      NOT NULL DEFAULT 0,
+    image_url     TEXT,
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
@@ -91,13 +106,81 @@ CREATE TABLE IF NOT EXISTS campaign_sectors (
 CREATE INDEX IF NOT EXISTS idx_campaign_sectors_boundary
     ON campaign_sectors USING GIST (boundary);
 
+CREATE TABLE IF NOT EXISTS candidates (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    full_name   VARCHAR(255) NOT NULL,
+    email       VARCHAR(255),
+    phone       VARCHAR(50),
+    photo_url   TEXT,
+    is_main     BOOLEAN      NOT NULL DEFAULT false,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+DO $$ BEGIN
+    ALTER TABLE scrutiny_reports ADD COLUMN zone VARCHAR(100);
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE scrutiny_reports ADD COLUMN votos_blanco INTEGER NOT NULL DEFAULT 0;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE scrutiny_reports ADD COLUMN votos_nulos INTEGER NOT NULL DEFAULT 0;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE scrutiny_reports ADD COLUMN candidate_votes JSONB NOT NULL DEFAULT '[]'::jsonb;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS logistics_dispatches (
     id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     campaign_id   UUID         NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     inventory_id  UUID         NOT NULL REFERENCES logistics_inventory(id) ON DELETE CASCADE,
     receiver_id   UUID         NOT NULL,
+    vehicle_id    UUID,
     quantity      INTEGER      NOT NULL,
     qr_code_token VARCHAR(255) NOT NULL UNIQUE,
-    status        VARCHAR(50)  NOT NULL DEFAULT 'PENDIENTE',
+    status        VARCHAR(50)  NOT NULL DEFAULT 'EN_CAMINO',
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
+DO $$ BEGIN
+    ALTER TABLE logistics_dispatches ADD COLUMN vehicle_id UUID;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE logistics_dispatches ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'EN_CAMINO';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE logistics_inventory ADD COLUMN image_url TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE vehicles ADD COLUMN driver_id UUID;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE vehicles ADD COLUMN image_url TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE vehicles ADD COLUMN soat_pdf_url TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE vehicles ADD COLUMN tecnomecanica_pdf_url TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
