@@ -258,12 +258,12 @@ export default function Candidates() {
 
       {!loading && !fetchError && candidates.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <table className="w-full text-left">
+          <table className="w-full text-left hidden md:table">
             <thead>
               <tr className="border-b border-slate-100">
                 <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16"></th>
                 <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell">Contacto</th>
+                <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Contacto</th>
                 <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Principal</th>
                 <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[140px]">Acciones</th>
               </tr>
@@ -281,11 +281,11 @@ export default function Candidates() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-slate-800">{c.full_name}</td>
-                  <td className="px-6 py-4 hidden md:table-cell">
+                  <td className="px-6 py-4">
                     <div className="space-y-1">
                       {c.email && <p className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12} />{c.email}</p>}
                       {c.phone && <p className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12} />{c.phone}</p>}
-                      {!c.email && !c.phone && <span className="text-xs text-slate-300">—</span>}
+                      {!c.email && !c.phone && <span className="text-xs text-slate-300">&mdash;</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -321,9 +321,48 @@ export default function Candidates() {
               ))}
             </tbody>
           </table>
+
+          <div className="divide-y divide-slate-50 md:hidden">
+            {candidates.map((c) => (
+              <div key={c.id} className="px-4 py-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  {c.photo_url ? (
+                    <img src={fullUrl(c.photo_url)} alt={c.full_name} className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                      <UserPlus size={20} className="text-slate-300" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800">{c.full_name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {c.is_main && <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700"><Star size={10} /> Principal</span>}
+                      {c.email && <span className="text-xs text-slate-400">{c.email}</span>}
+                    </div>
+                  </div>
+                </div>
+                {c.phone && <p className="text-xs text-slate-500 flex items-center gap-1.5"><Phone size={12} /> {c.phone}</p>}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => openEdit(c)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600
+                               hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
+                  >
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(c)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600
+                               hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={closeModal} />

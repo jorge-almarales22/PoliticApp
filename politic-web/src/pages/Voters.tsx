@@ -309,13 +309,13 @@ export default function Voters() {
 
       {!loading && !fetchError && voters.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto hidden md:block">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre</th>
                   <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">DNI</th>
-                  <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell">Direccion</th>
+                  <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Direccion</th>
                   <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Telefono</th>
                   <th className="px-6 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[140px]">Acciones</th>
                 </tr>
@@ -325,7 +325,7 @@ export default function Voters() {
                   <tr key={voter.id} className="group hover:bg-slate-50/60 transition-colors duration-150">
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">{voter.full_name}</td>
                     <td className="px-6 py-4 text-sm text-slate-500 font-mono">{voter.dni}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500 hidden md:table-cell">{voter.address || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500">{voter.address || '—'}</td>
                     <td className="px-6 py-4 text-sm text-slate-500 hidden lg:table-cell">{voter.phone || '—'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -353,6 +353,43 @@ export default function Voters() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="divide-y divide-slate-50 md:hidden">
+            {voters.map((voter) => (
+              <div key={voter.id} className="px-4 py-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800">{voter.full_name}</p>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">DNI: {voter.dni}</p>
+                  </div>
+                </div>
+                {(voter.address || voter.phone) && (
+                  <div className="text-xs text-slate-500 space-y-0.5">
+                    {voter.address && <p className="flex items-center gap-1.5"><MapPin size={12} /> {voter.address}</p>}
+                    {voter.phone && <p>Tel: {voter.phone}</p>}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => openEditModal(voter)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600
+                               transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
+                  >
+                    <Pencil size={14} />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(voter)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600
+                               transition-all duration-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                  >
+                    <Trash2 size={14} />
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

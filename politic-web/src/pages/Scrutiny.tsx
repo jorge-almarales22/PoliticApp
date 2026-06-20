@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, type FormEvent, type DragEvent } from 'react'
 import {
   Send, FileText, X, Loader2, AlertTriangle, CheckCircle2,
-  Image as ImageIcon, MapPin, Table2, Vote, Camera, UserPlus,
+  Image as ImageIcon, MapPin, Vote, Camera, UserPlus,
 } from 'lucide-react'
 import api from '../services/api'
 
@@ -245,7 +245,7 @@ export default function Scrutiny() {
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         <div className="xl:col-span-2">
-          <div className="bg-white rounded-2xl border border-slate-100 p-6 sticky top-24">
+          <div className="bg-white rounded-2xl border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-24">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 rounded-xl bg-indigo-50"><Vote size={20} className="text-indigo-600" /></div>
               <div>
@@ -284,7 +284,7 @@ export default function Scrutiny() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-3 sm:p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Votos por Candidato</p>
                 {candidatesLoading && (
                   <div className="flex items-center gap-2 text-sm text-slate-400"><Loader2 size={14} className="animate-spin" /> Cargando candidatos...</div>

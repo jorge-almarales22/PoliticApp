@@ -190,30 +190,30 @@ export default function Dashboard() {
 
         <div className="rounded-xl overflow-hidden border border-slate-100">
           {isLoading && (
-            <div className="h-[480px] bg-slate-50 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-                <p className="text-sm text-slate-400">Cargando mapa...</p>
-              </div>
-            </div>
-          )}
+             <div className="h-[280px] sm:h-[360px] lg:h-[480px] bg-slate-50 flex items-center justify-center">
+               <div className="flex flex-col items-center gap-3">
+                 <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+                 <p className="text-sm text-slate-400">Cargando mapa...</p>
+               </div>
+             </div>
+           )}
 
-          {hasError && !isLoading && (
-            <div className="h-[480px] bg-slate-50 flex items-center justify-center">
-              <div className="text-center">
-                <AlertTriangle size={36} className="text-slate-200 mx-auto mb-3" />
-                <p className="text-slate-400 text-sm">No se pudo cargar el mapa</p>
-              </div>
-            </div>
-          )}
+           {hasError && !isLoading && (
+             <div className="h-[280px] sm:h-[360px] lg:h-[480px] bg-slate-50 flex items-center justify-center">
+               <div className="text-center">
+                 <AlertTriangle size={36} className="text-slate-200 mx-auto mb-3" />
+                 <p className="text-slate-400 text-sm">No se pudo cargar el mapa</p>
+               </div>
+             </div>
+           )}
 
-          {hasData && (
-            <div className="w-full">
-              <MapContainer
-                center={[10.46314, -73.25322]}
-                zoom={13}
-                className="h-[480px] w-full z-0"
-                zoomControl
+           {hasData && (
+             <div className="w-full">
+               <MapContainer
+                 center={[10.46314, -73.25322]}
+                 zoom={13}
+                 className="h-[280px] sm:h-[360px] lg:h-[480px] w-full z-0"
+                 zoomControl
                 whenReady={() => setMapReady(true)}
               >
                 <TileLayer

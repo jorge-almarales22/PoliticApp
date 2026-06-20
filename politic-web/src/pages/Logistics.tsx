@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, type FormEvent, type DragEvent } from 'react'
+import { useState, useEffect, useRef, type FormEvent } from 'react'
 import {
   Truck, Package, QrCode, UserSquare2, Send, Plus, X, Loader2,
   AlertTriangle, CheckCircle2, Pencil, FileText, Image as ImageIcon,
-  Search, Download,
+  Search,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import api from '../services/api'
@@ -181,10 +181,10 @@ export default function Logistics() {
         </div>
       )}
 
-      <div className="flex gap-1 bg-slate-100 rounded-2xl p-1.5 w-fit overflow-x-auto">
+      <div className="flex gap-0.5 sm:gap-1 bg-slate-100 rounded-2xl p-1 sm:p-1.5 w-fit max-w-full overflow-x-auto">
         {TABS.map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setTab(key)}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${tab === key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 ${tab === key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             <Icon size={16} /><span className="hidden sm:inline">{label}</span>
           </button>
         ))}
@@ -198,19 +198,19 @@ export default function Logistics() {
               <Plus size={16} /> Agregar
             </button>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-x-auto">
             {invLoading ? <div className="p-12 flex justify-center"><Loader2 size={24} className="text-indigo-400 animate-spin" /></div>
               : inventory.length === 0 ? <div className="p-12 text-center text-sm text-slate-400">Sin materiales.</div>
-                : <table className="w-full text-left"><thead><tr className="border-b border-slate-100"><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase w-16"></th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Material</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Tipo</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase text-right">Total</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase text-right">Asignado</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase text-right">Disp.</th></tr></thead>
+                : <table className="w-full text-left min-w-[500px]"><thead><tr className="border-b border-slate-100"><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase w-16"></th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Material</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Tipo</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase text-right">Total</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase text-right">Asignado</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase text-right">Disp.</th></tr></thead>
                   <tbody className="divide-y divide-slate-50">
                     {inventory.map((i) => (
                       <tr key={i.id} className="hover:bg-slate-50/60">
-                        <td className="px-6 py-3">{i.image_url ? <img src={fullUrl(i.image_url)} className="w-8 h-8 rounded-lg object-cover border border-slate-200" alt="" /> : <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Package size={14} className="text-slate-300" /></div>}</td>
-                        <td className="px-6 py-3 text-sm font-medium text-slate-800">{i.item_name}</td>
-                        <td className="px-6 py-3 text-xs text-slate-500">{ITEM_TYPE_LABEL[i.item_type] ?? i.item_type}</td>
-                        <td className="px-6 py-3 text-sm text-slate-700 text-right font-mono">{i.total_qty}</td>
-                        <td className="px-6 py-3 text-sm text-slate-500 text-right font-mono">{i.allocated_qty}</td>
-                        <td className="px-6 py-3 text-sm text-slate-800 text-right font-mono font-semibold">{i.total_qty - i.allocated_qty}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3">{i.image_url ? <img src={fullUrl(i.image_url)} className="w-8 h-8 rounded-lg object-cover border border-slate-200" alt="" /> : <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Package size={14} className="text-slate-300" /></div>}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-slate-800">{i.item_name}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs text-slate-500">{ITEM_TYPE_LABEL[i.item_type] ?? i.item_type}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-700 text-right font-mono">{i.total_qty}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-500 text-right font-mono">{i.allocated_qty}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-800 text-right font-mono font-semibold">{i.total_qty - i.allocated_qty}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -225,18 +225,18 @@ export default function Logistics() {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Conductores</h2>
             <button onClick={() => { setDrvPdf(null); setDrvModal(true) }} className="btn-primary"><Plus size={16} /> Registrar</button>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-x-auto">
             {drvLoading ? <div className="p-12 flex justify-center"><Loader2 size={24} className="text-indigo-400 animate-spin" /></div>
               : drivers.length === 0 ? <div className="p-12 text-center text-sm text-slate-400">Sin conductores.</div>
-                : <table className="w-full text-left"><thead><tr className="border-b border-slate-100"><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Nombre</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">DNI</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase hidden md:table-cell">Direccion</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Tipo Sangre</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Licencia</th></tr></thead>
+                : <table className="w-full text-left min-w-[500px]"><thead><tr className="border-b border-slate-100"><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Nombre</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">DNI</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase hidden md:table-cell">Direccion</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Tipo Sangre</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Licencia</th></tr></thead>
                   <tbody className="divide-y divide-slate-50">
                     {drivers.map((d) => (
                       <tr key={d.id} className="hover:bg-slate-50/60">
-                        <td className="px-6 py-3 text-sm font-medium text-slate-800">{d.full_name}</td>
-                        <td className="px-6 py-3 text-sm text-slate-600 font-mono">{d.dni}</td>
-                        <td className="px-6 py-3 text-sm text-slate-500 hidden md:table-cell">{d.address || '—'}</td>
-                        <td className="px-6 py-3 text-sm text-slate-600">{d.blood_type || '—'}</td>
-                        <td className="px-6 py-3">
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-slate-800">{d.full_name}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-600 font-mono">{d.dni}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-500 hidden md:table-cell">{d.address || '—'}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-600">{d.blood_type || '—'}</td>
+                        <td className="px-3 sm:px-6 py-2.5 sm:py-3">
                           {d.license_pdf_url ? (
                             <a href={fullUrl(d.license_pdf_url)} target="_blank" rel="noreferrer"
                               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-all">
@@ -258,28 +258,28 @@ export default function Logistics() {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Flota de Vehiculos</h2>
             <button onClick={() => { setVehImg(null); setVehSoat(null); setVehTecno(null); setVehModal(true) }} className="btn-primary"><Plus size={16} /> Registrar</button>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-x-auto">
             {vehLoading ? <div className="p-12 flex justify-center"><Loader2 size={24} className="text-indigo-400 animate-spin" /></div>
               : vehicles.length === 0 ? <div className="p-12 text-center text-sm text-slate-400">Sin vehiculos.</div>
-                : <table className="w-full text-left"><thead><tr className="border-b border-slate-100"><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Placa</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase hidden md:table-cell">Conductor</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Estado</th><th className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Documentos</th></tr></thead>
+                : <table className="w-full text-left min-w-[500px]"><thead><tr className="border-b border-slate-100"><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Placa</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase hidden md:table-cell">Conductor</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Estado</th><th className="px-3 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-slate-400 uppercase">Documentos</th></tr></thead>
                   <tbody className="divide-y divide-slate-50">
                     {vehicles.map((v) => {
                       const st = VEHICLE_STATUS[v.status] ?? 'bg-slate-50 text-slate-600 border-slate-200'
                       return (
                         <tr key={v.id} className="hover:bg-slate-50/60">
-                          <td className="px-6 py-3">
+                          <td className="px-3 sm:px-6 py-2.5 sm:py-3">
                             <div className="flex items-center gap-3">
                               {v.image_url ? <img src={fullUrl(v.image_url)} className="w-8 h-8 rounded-lg object-cover border border-slate-200" alt="" /> : <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Truck size={14} className="text-slate-300" /></div>}
                               <div><p className="text-sm font-mono font-medium text-slate-800">{v.plate}</p><p className="text-xs text-slate-400">{v.model || '—'}</p></div>
                             </div>
                           </td>
-                          <td className="px-6 py-3 text-sm text-slate-600 hidden md:table-cell">{v.driver_name || '—'}</td>
-                          <td className="px-6 py-3">
+                          <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-sm text-slate-600 hidden md:table-cell">{v.driver_name || '—'}</td>
+                          <td className="px-3 sm:px-6 py-2.5 sm:py-3">
                             <button onClick={() => toggleVehicle(v)} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium hover:opacity-80 transition-all ${st}`}>
                               <Pencil size={11} /> {v.status === 'DISPONIBLE' ? 'Disponible' : v.status === 'EN RUTA' ? 'En Ruta' : 'Mantenimiento'}
                             </button>
                           </td>
-                          <td className="px-6 py-3">
+                          <td className="px-3 sm:px-6 py-2.5 sm:py-3">
                             <div className="flex items-center gap-1.5">
                               {v.soat_pdf_url && <a href={fullUrl(v.soat_pdf_url)} target="_blank" className="btn-doc" title="SOAT"><FileText size={14} /> SOAT</a>}
                               {v.tecnomecanica_pdf_url && <a href={fullUrl(v.tecnomecanica_pdf_url)} target="_blank" className="btn-doc" title="Tecnomecanica"><FileText size={14} /> TCM</a>}
@@ -298,7 +298,7 @@ export default function Logistics() {
       {tab === 'dispatch' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <form onSubmit={handleSubmitDispatch} className="bg-white rounded-2xl border border-slate-100 p-6 space-y-5">
+            <form onSubmit={handleSubmitDispatch} className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 space-y-4 sm:space-y-5">
               <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Nuevo Despacho</h3>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Material<span className="text-red-400">*</span></label>
@@ -345,14 +345,14 @@ export default function Logistics() {
             </form>
 
             <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100"><h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Historial</h3></div>
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100"><h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Historial</h3></div>
               {dispLoading ? <div className="p-12 flex justify-center"><Loader2 size={24} className="text-indigo-400 animate-spin" /></div>
                 : dispatches.length === 0 ? <div className="p-12 text-center text-sm text-slate-400">Sin despachos.</div>
                   : <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
                     {dispatches.map((d) => {
                       const st = DISPATCH_STATUS[d.status] ?? 'bg-slate-50 text-slate-600'
                       return (
-                        <div key={d.id} className="px-6 py-3 flex items-center justify-between hover:bg-slate-50/60">
+                        <div key={d.id} className="px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-slate-50/60">
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-slate-800 truncate">{d.item_name} <span className="text-slate-400">x{d.quantity}</span></p>
                             <p className="text-xs text-slate-400 mt-0.5">{d.receiver_name || d.receiver_id.slice(0, 8)} {d.vehicle_plate ? `· ${d.vehicle_plate}` : ''}</p>
